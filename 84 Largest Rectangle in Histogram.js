@@ -1,36 +1,24 @@
-var largestRectangleArea = function (heights) {
-  let res = 0;
-  const heightsLen = heights.length;
-  console.log(heightsLen);
-  const all = Array.from(new Set(heights)).sort((a, b) => a - b);
-  let counter = 0;
-
-  if (heights.every((a) => a > 0)) res = heightsLen;
-  if (res < all.at(-1)) res = all.at(-1);
-  for (let i = all[counter] || 1; i <= all.at(-1); i = all[counter]) {
-    let start, end;
-
-    for (let j = 0; j < heightsLen; j++) {
-      if (start !== undefined) {
-        if (heights[j] < i) {
-          end = j;
-          let sliced = heights.slice(start, end);
-          let lng = sliced.length * i;
-          res = lng > res ? lng : res;
-          start = end = undefined;
-          // continue;
-        } else if (heights[j] >= i && j == heightsLen - 1) {
-          end = j;
-          let sliced = heights.slice(start, end + 1);
-          let lng = sliced.length * i;
-          res = lng > res ? lng : res;
-          start = end = undefined;
-        }
-      }
-      if (!start && start !== 0 && heights[j] >= i) start = j;
+function largestRectangleArea(heights) {
+  let nextSmaller = new Array(heights.length).fill(heights.length);
+  let previousSmaller = new Array(heights.length).fill(-1);
+  let stack = [];
+  for (let i = 0; i < heights.length; i++) {
+    while (stack.length && heights[stack.at(-1)] > heights[i]) {
+      let stackTop = stack.pop();
+      nextSmaller[stackTop] = i;
     }
-    counter++;
+    if (stack.length) {
+      previousSmaller[i] = stack.at(-1);
+    }
+    stack.push(i);
   }
 
-  return res;
-};
+  let maxArea = 0;
+  for (let i = 0; i < heights.length; i++) {
+    let currentHeight = heights[i];
+    let width = nextSmaller[i] - previousSmaller[i] - 1;
+    maxArea = Math.max(maxArea, currentHeight * width);
+  }
+
+  return maxArea;
+}
